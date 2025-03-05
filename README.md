@@ -7,7 +7,7 @@ Designed to work as the ONLINE half of the system for offline transactions. Simp
 General information on XDC Network Send-Offline-Functionality can be found here: <a href="https://medium.com/xinfin/send-offline-functionality-sof-a-secure-way-to-transact-xdc-coins-3734eaa81365" target="_blank">https://medium.com/xinfin/send-offline-functionality-sof-a-secure-way-to-transact-xdc-coins-3734eaa81365</a>
 
 ## To use this send offline helper:
-- Specify an RPC )if you want to use a different one to the default Ankr one specified). You can find a list of current public XDC RPCs at <a href="https://chainlist.org/chain/50" target="_blank">https://chainlist.org/chain/50</a>
+- Specify an RPC (if you want to use a different one to the default Ankr one specified). You can find a list of current public XDC RPCs at <a href="https://chainlist.org/chain/50" target="_blank">https://chainlist.org/chain/50</a>
 - Enter the XDC address you are sending from. Page accepts both 0x and xdc prefix formats. Then press "Get Transaction Parameters".
 - You will then be presented with the "Gas Limit Suggestion", "Nonce", and "Suggested Gas Price". These are the numbers to use in your offline transaction builder (the OFFLINE half of the Send Offline Functionality).
 - Build the transaction with your offline transaction builder.
