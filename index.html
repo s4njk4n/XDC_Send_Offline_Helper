@@ -179,11 +179,11 @@
                 const gasPriceGwei = (gasPriceWei / 1e9).toString().replace(/\.?0+$/, '');
 
                 paramsResult.innerHTML = `
-                    <span style="color: green;">Success!</span><br>
-                    Address: ${inputAddress}<br><br>
+                    <span style="color: green;">Success!</span><br><br>
+                    <strong>Address:</strong> ${inputAddress}<br><br>
                     <strong>Gas Limit Suggestion:</strong> Use 21,000 (increase to 25,000 if not working; consider 60,000 for XRC-20 token transfers)<br><br>
                     <strong>Nonce:</strong> ${nonce}<br><br>
-                    <strong>Suggested Gas Price:</strong> ${gasPriceGwei} gwei
+                    <strong>Suggested Gas Price:</strong> ${gasPriceGwei} Gwei
                 `;
             } catch (error) {
                 paramsResult.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
