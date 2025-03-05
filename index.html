@@ -208,14 +208,14 @@
 
                 if (data.result) {
                     const txHash = data.result;
-                    broadcastResult.innerHTML = `<span style="color: green;">Transaction successfully broadcasted!</span><br>Transaction Hash: ${txHash}<br><a href="https://xdcscan.com/tx/${txHash}" target="_blank">View on XDCScan</a>`;
+                    broadcastResult.innerHTML = `<span style="color: green;"><strong>Transaction successfully broadcasted!</strong></span><br><br><strong>Transaction Hash:</strong> ${txHash}<br><br><a href="https://xdcscan.com/tx/${txHash}" target="_blank"><strong>View on XDCScan</strong></a>`;
                 } else if (data.error) {
-                    broadcastResult.innerHTML = `<span style="color: red;">Error: ${data.error.message}</span>`;
+                    broadcastResult.innerHTML = `<span style="color: red;"><strong>Error:</strong> ${data.error.message}</span>`;
                 } else {
-                    broadcastResult.innerHTML = '<span style="color: red;">Unknown response from RPC.</span>';
+                    broadcastResult.innerHTML = '<span style="color: red;"><strong>Unknown response from RPC.</strong></span>';
                 }
             } catch (error) {
-                broadcastResult.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+                broadcastResult.innerHTML = `<span style="color: red;"><strong>Error:</strong> ${error.message}</span>`;
             }
         }
 
