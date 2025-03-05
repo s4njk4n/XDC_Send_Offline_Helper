@@ -180,10 +180,10 @@
 
                 paramsResult.innerHTML = `
                     <span style="color: green;">Success!</span><br>
-                    Address: ${inputAddress}<br>
-                    <strong>Gas Limit Suggestion:</strong> Use 21,000 (increase to 25,000 if not working; consider 60,000 for XRC-20 token transfers)<br>
-                    Nonce: ${nonce}<br>
-                    Suggested Gas Price: ${gasPriceGwei} gwei
+                    Address: ${inputAddress}<br><br>
+                    <strong>Gas Limit Suggestion:</strong> Use 21,000 (increase to 25,000 if not working; consider 60,000 for XRC-20 token transfers)<br><br>
+                    <strong>Nonce:</strong> ${nonce}<br><br>
+                    <strong>Suggested Gas Price:</strong> ${gasPriceGwei} gwei
                 `;
             } catch (error) {
                 paramsResult.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
