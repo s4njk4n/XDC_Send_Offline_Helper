@@ -256,7 +256,7 @@
                 }
                 requestAnimationFrame(scan);
             } catch (error) {
-                broadcastResult.innerHTML = `<span style="color: red;">Error: Failed to access camera - ${error.message}</span>`;
+                broadcastResult.innerHTML = `<span style="color: red;"><strong>Error:</strong> Failed to access camera - ${error.message}</span>`;
             }
         }
 
