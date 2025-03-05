@@ -2,7 +2,7 @@
 
 Can be accessed here: [https://s4njk4n.github.io/XDC_Send_Offline_Helper/](https://s4njk4n.github.io/XDC_Send_Offline_Helper/)
 
-Designed to work as the ONLINE half of the system for offline transactions. Simple to use via a mobile phone browser. You can save the bookmark on your mobile web browser or even "Save to Homescreen" on iPhones to save it as a webapp with is own desktop icon on your phone. It is set to use the XDC logo for the icon on your phone in this case.
+Designed to work as the ONLINE half of the system for offline transactions. Simple to use via a mobile phone browser. You can save the bookmark on your mobile web browser or even "Save to Homescreen" on iPhones to save it as a webapp with its own desktop icon on your phone. It is set to use the XDC logo for the icon on your phone in this case.
 
 General information on XDC Network send offline functionality can be found here: [https://medium.com/xinfin/send-offline-functionality-sof-a-secure-way-to-transact-xdc-coins-3734eaa81365
 ](https://medium.com/xinfin/send-offline-functionality-sof-a-secure-way-to-transact-xdc-coins-3734eaa81365)
