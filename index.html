@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XDC Send Offline Helper</title>
+    <!-- Standard Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!-- Apple Touch Icon for iOS home screen -->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f6f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2, h3 {
+            color: #003087; /* XDC Dark Blue */
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+        textarea#signedTx {
+            height: 200px; /* Increased from implied 100px */
+            resize: vertical; /* Allows users to adjust height manually */
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        #getParamsBtn {
+            background-color: #00AEEF; /* XDC Light Blue */
+        }
+        #scanQrBtn {
+            background-color: #28a745;
+        }
+        #broadcastBtn {
+            background-color: #003087; /* XDC Dark Blue */
+        }
+        #stopScanBtn {
+            background-color: #dc3545;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #qrScanner {
+            display: none;
+            margin-top: 10px;
+        }
+        #qrVideo {
+            width: 100%;
+            max-height: 300px;
+        }
+        .result {
+            margin-top: 20px;
+            word-wrap: break-word;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        footer a {
+            color: #00AEEF;
+            text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            button {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>XDC Send Offline Helper</h2>
+
+        <!-- RPC Selection -->
+        <h3>RPC Endpoint</h3>
+        <p>Use the default RPC or enter a custom one:</p>
+        <input type="text" id="rpcUrl" value="https://rpc.ankr.com/xdc" placeholder="e.g., https://rpc.ankr.com/xdc">
+
+        <!-- Section 1: Get Nonce and Gas Price -->
+        <h3>Get Nonce and Gas Price</h3>
+        <p>Enter the XDC address you are sending from:</p>
+        <input type="text" id="address" placeholder="e.g., 0xd21b... or xdc123...">
+        <button id="getParamsBtn" onclick="getTxParams()">Get Transaction Parameters</button>
+        <div id="paramsResult" class="result"></div>
+
+        <!-- Section 2: Broadcast Transaction -->
+        <h3>Broadcast Signed Transaction</h3>
+        <p>Paste your signed transaction or scan a QR code:</p>
+        <textarea id="signedTx" placeholder="e.g., 0xf86b01..."></textarea>
+        <button id="scanQrBtn" onclick="startQrScanner()">Scan QR Code</button>
+        <button id="broadcastBtn" onclick="broadcastTransaction()">Broadcast Transaction</button>
+        <div id="qrScanner">
+            <video id="qrVideo"></video>
+            <button id="stopScanBtn" onclick="stopQrScanner()">Stop Scanner</button>
+        </div>
+        <div id="broadcastResult" class="result"></div>
+    </div>
+
+    <footer>
+        Created by <a href="https://github.com/s4njk4n/XDC_Send_Offline_Helper" target="_blank">s4njk4n</a>
+    </footer>
+
+    <!-- Include jsQR library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script>
+        // Get RPC URL from input
+        function getRpcUrl() {
+            const rpcUrl = document.getElementById('rpcUrl').value.trim();
+            if (!rpcUrl || !rpcUrl.match(/^https?:\/\/.+/)) {
+                throw new Error('Invalid RPC URL. Please enter a valid URL (e.g., https://rpc.ankr.com/xdc).');
+            }
+            return rpcUrl;
+        }
+
+        // Normalize XDC address (convert xdc prefix to 0x if present)
+        function normalizeAddress(address) {
+            if (address.startsWith('xdc')) {
+                return '0x' + address.slice(3);
+            }
+            return address;
+        }
+
+        // Fetch nonce and gas price
+        async function getTxParams() {
+            const inputAddress = document.getElementById('address').value.trim();
+            const paramsResult = document.getElementById('paramsResult');
+
+            if (!inputAddress || !inputAddress.match(/^(0x|xdc)[0-9a-fA-F]{40}$/)) {
+                paramsResult.innerHTML = '<span style="color: red;">Error: Please enter a valid XDC address (0x or xdc followed by 40 hex characters).</span>';
+                return;
+            }
+
+            const address = normalizeAddress(inputAddress);
+
+            try {
+                const rpcUrl = getRpcUrl();
+                const noncePayload = { jsonrpc: "2.0", method: "eth_getTransactionCount", params: [address, "latest"], id: 1 };
+                const gasPricePayload = { jsonrpc: "2.0", method: "eth_gasPrice", params: [], id: 2 };
+
+                const nonceResponse = await fetch(rpcUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(noncePayload) });
+                const nonceData = await nonceResponse.json();
+                if (!nonceData.result) throw new Error(nonceData.error?.message || 'Failed to fetch nonce');
+                const nonce = parseInt(nonceData.result, 16);
+
+                const gasPriceResponse = await fetch(rpcUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(gasPricePayload) });
+                const gasPriceData = await gasPriceResponse.json();
+                if (!gasPriceData.result) throw new Error(gasPriceData.error?.message || 'Failed to fetch gas price');
+                const gasPriceWei = parseInt(gasPriceData.result, 16);
+                const gasPriceGwei = (gasPriceWei / 1e9).toString().replace(/\.?0+$/, '');
+
+                paramsResult.innerHTML = `
+                    <span style="color: green;">Success!</span><br>
+                    Address: ${inputAddress}<br>
+                    <strong>Gas Limit Suggestion:</strong> Use 21,000 (increase to 25,000 if not working; consider 60,000 for XRC-20 token transfers)<br>
+                    Nonce: ${nonce}<br>
+                    Suggested Gas Price: ${gasPriceGwei} gwei
+                `;
+            } catch (error) {
+                paramsResult.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+            }
+        }
+
+        // Broadcast signed transaction
+        async function broadcastTransaction() {
+            const signedTx = document.getElementById('signedTx').value.trim();
+            const broadcastResult = document.getElementById('broadcastResult');
+
+            if (!signedTx || !signedTx.match(/^0x[0-9a-fA-F]+$/)) {
+                broadcastResult.innerHTML = '<span style="color: red;">Error: Please enter a valid signed transaction (0x followed by hex characters).</span>';
+                return;
+            }
+
+            try {
+                const rpcUrl = getRpcUrl();
+                const payload = { jsonrpc: "2.0", method: "eth_sendRawTransaction", params: [signedTx], id: 3 };
+                const response = await fetch(rpcUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await response.json();
+
+                if (data.result) {
+                    const txHash = data.result;
+                    broadcastResult.innerHTML = `<span style="color: green;">Transaction successfully broadcasted!</span><br>Transaction Hash: ${txHash}<br><a href="https://xdcscan.com/tx/${txHash}" target="_blank">View on XDCScan</a>`;
+                } else if (data.error) {
+                    broadcastResult.innerHTML = `<span style="color: red;">Error: ${data.error.message}</span>`;
+                } else {
+                    broadcastResult.innerHTML = '<span style="color: red;">Unknown response from RPC.</span>';
+                }
+            } catch (error) {
+                broadcastResult.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+            }
+        }
+
+        // QR Code Scanner Functions
+        let stream = null;
+
+        async function startQrScanner() {
+            const qrScanner = document.getElementById('qrScanner');
+            const qrVideo = document.getElementById('qrVideo');
+            const signedTxField = document.getElementById('signedTx');
+            const broadcastResult = document.getElementById('broadcastResult');
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                qrVideo.srcObject = stream;
+                qrScanner.style.display = 'block';
+                broadcastResult.innerHTML = '';
+
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+
+                function scan() {
+                    if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+                        canvas.width = qrVideo.videoWidth;
+                        canvas.height = qrVideo.videoHeight;
+                        context.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                        if (code) {
+                            signedTxField.value = code.data;
+                            stopQrScanner();
+                            broadcastResult.innerHTML = '<span style="color: green;">QR code scanned successfully!</span>';
+                            return;
+                        }
+                    }
+                    requestAnimationFrame(scan);
+                }
+                requestAnimationFrame(scan);
+            } catch (error) {
+                broadcastResult.innerHTML = `<span style="color: red;">Error: Failed to access camera - ${error.message}</span>`;
+            }
+        }
+
+        function stopQrScanner() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            document.getId('qrScanner').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
