@@ -1,11 +1,11 @@
 # Tool for sending XDC offline
 
-Can be accessed here: [https://s4njk4n.github.io/XDC_Send_Offline_Helper/]https://s4njk4n.github.io/XDC_Send_Offline_Helper/
+Can be accessed here: [https://s4njk4n.github.io/XDC_Send_Offline_Helper/](https://s4njk4n.github.io/XDC_Send_Offline_Helper/)
 
 Designed to work as the ONLINE half of the system for offline transactions.
 
 General information on XDC Network send offline functionality can be found here: [https://medium.com/xinfin/send-offline-functionality-sof-a-secure-way-to-transact-xdc-coins-3734eaa81365
-]https://medium.com/xinfin/send-offline-functionality-sof-a-secure-way-to-transact-xdc-coins-3734eaa81365
+](https://medium.com/xinfin/send-offline-functionality-sof-a-secure-way-to-transact-xdc-coins-3734eaa81365)
 
 ## To use this send offline helper:
 - Specify an RPC if you want to use a different one to the default Ankr one specified.
