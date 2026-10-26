@@ -187,7 +187,7 @@
 
         <h3>1. RPC Endpoint</h3>
         <p>Use the default RPC or enter a custom one from <a href="https://chainlist.org/chain/50" target="_blank">Chainlist</a>:</p>
-        <input type="text" id="rpcUrl" value="https://rpc.ankr.com/xdc" placeholder="e.g., https://rpc.ankr.com/xdc">
+        <input type="text" id="rpcUrl" value="https://rpc.plugin.global/xdcmainnet" placeholder="e.g., https://rpc.plugin.global/xdcmainnet">
 
         <h3>2. Get Transaction Parameters</h3>
         <p>Enter the XDC address you are sending from:</p>
@@ -228,7 +228,7 @@
         function getRpcUrl() {
             const rpcUrl = document.getElementById('rpcUrl').value.trim();
             if (!rpcUrl || !rpcUrl.match(/^https?:\/\/.+/)) {
-                throw new Error('Invalid RPC URL. Please enter a valid URL (e.g., https://rpc.ankr.com/xdc).');
+                throw new Error('Invalid RPC URL. Please enter a valid URL (e.g., https://rpc.plugin.global/xdcmainnet).');
             }
             return rpcUrl;
         }
