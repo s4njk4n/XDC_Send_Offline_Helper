@@ -1,6 +1,6 @@
 # Tool for sending XDC offline
 
-Can be accessed here: <a href="https://s4njk4n.github.io/XDC_Send_Offline_Helper/" target="_blank">https://s4njk4n.github.io/XDC_Send_Offline_Helper/</a>
+Can be accessed here: <a href="https://xdcoutpost.xyz/XDC_Send_Offline_Helper/" target="_blank">https://xdcoutpost.xyz/XDC_Send_Offline_Helper/</a>
 
 Designed to work as the ONLINE half of the system for offline transactions. Simple to use via a mobile phone browser. You can save the bookmark on your mobile web browser or even "Save to Homescreen" on iPhones to save it as a webapp with its own desktop icon on your phone. It is set to use the XDC logo for the icon on your phone in this case.
 
@@ -12,7 +12,7 @@ General information on XDC Network Send-Offline-Functionality can be found here:
 - You will then be presented with the "Gas Limit Suggestion", "Nonce", and "Suggested Gas Price". These are the numbers to use in your offline transaction builder (the OFFLINE half of the Send Offline Functionality).
 - For ease-of-use it will also show the "XDC Balance" of the address so you dont need to separately look it up on a block explorer.
 - Build the transaction with your offline transaction builder.
-- Once completed/signed on the OFFLINE device, you just need to get the signed transaction data into the "Broadcast Signed Transaction" box at the bottom of the Send Offline Helper page we created.
+- Once completed/signed on the OFFLINE device, you just need to get the signed transaction data into the "Signed transaction" box in step 3 of the Send Offline Helper page we created.
 - One way to do this is to manually enter it.
 - A simpler way, if your offline transaction builder presents a QR code, is to just point your camera at the QR code, THEN press the "Scan QR Code" button. If it has been scanned, you will see your same transaction populate the box in the Send Offline Helper.
 - Then you just press the "Broadcast Transaction" button and you're done.
