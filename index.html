@@ -284,6 +284,7 @@
       .group-body > .actions > .btn-primary { flex: 1; padding-top: 0.9rem; padding-bottom: 0.9rem; font-size: 1.05rem; }
     }
   </style>
+  <script src="/assets/analytics.js"></script>
 </head>
 <body>
   <a class="skip" href="#details">Skip to the tool</a>
@@ -310,7 +311,7 @@
       <nav class="site-nav" aria-label="Main">
         <a href="/#tools">All tools</a>
         <a class="wide" href="#know">How it works</a>
-        <a class="wide" href="https://github.com/s4njk4n/XDC_Send_Offline_Helper" target="_blank" rel="noopener">Source code</a>
+        <a class="wide" href="https://github.com/s4njk4n/XDC_Send_Offline_Helper" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Send_Offline_Helper">Source code</a>
       </nav>
     </div>
   </header>
@@ -452,10 +453,10 @@
           <p>Questions about sending offline, a bug to report, or an idea? Message me on whichever platform suits you.</p>
         </div>
         <ul class="channels">
-          <li><a href="https://t.me/s4njk4n" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-telegram"/></svg><span class="name">Telegram</span><span class="handle">@s4njk4n</span></a></li>
-          <li><a href="https://discord.com/users/852434672793288724" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-discord"/></svg><span class="name">Discord</span><span class="handle">@s4njk4n</span></a></li>
-          <li><a href="https://x.com/s4njk4n" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-x"/></svg><span class="name">X</span><span class="handle">@s4njk4n</span></a></li>
-          <li><a href="https://github.com/s4njk4n/XDC_Send_Offline_Helper" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-github"/></svg><span class="name">GitHub</span><span class="handle">Send Offline Helper</span></a></li>
+          <li><a href="https://t.me/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="contact/telegram"><svg aria-hidden="true"><use href="#i-telegram"/></svg><span class="name">Telegram</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://discord.com/users/852434672793288724" target="_blank" rel="noopener" data-goatcounter-click="contact/discord"><svg aria-hidden="true"><use href="#i-discord"/></svg><span class="name">Discord</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://x.com/s4njk4n" target="_blank" rel="noopener" data-goatcounter-click="contact/x"><svg aria-hidden="true"><use href="#i-x"/></svg><span class="name">X</span><span class="handle">@s4njk4n</span></a></li>
+          <li><a href="https://github.com/s4njk4n/XDC_Send_Offline_Helper" target="_blank" rel="noopener" data-goatcounter-click="github/XDC_Send_Offline_Helper"><svg aria-hidden="true"><use href="#i-github"/></svg><span class="name">GitHub</span><span class="handle">Send Offline Helper</span></a></li>
         </ul>
       </div>
     </section>
@@ -463,7 +464,7 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <p>© <span id="year">2026</span> XDC Outpost, by <a href="https://github.com/s4njk4n?tab=repositories" target="_blank" rel="noopener">s4njk4n</a></p>
+      <p>© <span id="year">2026</span> XDC Outpost, by <a href="https://github.com/s4njk4n?tab=repositories" target="_blank" rel="noopener" data-goatcounter-click="github/profile">s4njk4n</a></p>
       <p><a href="/">More XDC tools</a></p>
     </div>
   </footer>
@@ -588,6 +589,7 @@
           ? `This address has ${pending - latest} transaction${pending - latest > 1n ? 's' : ''} waiting to be confirmed, so the nonce above already allows for ${pending - latest > 1n ? 'them' : 'it'}.`
           : `Values for ${toXdc(address).slice(0, 9)}…${address.slice(-4)}, fetched ${new Date().toLocaleTimeString()}. Gas price can change, so fetch again if you wait a long time before signing.`;
         $('paramsResult').hidden = false;
+        xdcTrack('send-offline/details-fetched');
         lastParams = { address: address.toLowerCase(), nonce: pending, balance: balanceWei, gasPrice: gasWei };
         renderReview();
       } catch (error) {
@@ -716,6 +718,7 @@
       broadcasting = true; busy(btn, true, 'Broadcasting…');
       try {
         const txHash = await rpc('eth_sendRawTransaction', [signedTx]);
+        xdcTrack('send-offline/broadcast');
         const h = escapeHtml(txHash);
         setNotice('broadcastResult', 'ok', `<strong>Transaction broadcast.</strong> It usually confirms within a few seconds.<br><span class="hash">${h}</span>
           <div class="actions"><a class="btn btn-primary btn-small" href="${EXPLORER_TX}${h}" target="_blank" rel="noopener">View on XDCScan</a><button type="button" class="btn btn-ghost btn-small" id="copyHashBtn">Copy hash</button></div>`);
@@ -765,6 +768,7 @@
             if (code && code.data) {
               $('signedTx').value = code.data.trim();
               stopQrScanner();
+              xdcTrack('send-offline/qr-scanned');
               if (navigator.vibrate) navigator.vibrate(60);
               renderReview();
               setNotice('broadcastResult', 'ok', 'QR code scanned. Check the summary, then broadcast.');

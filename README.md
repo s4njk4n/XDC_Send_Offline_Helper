@@ -1,6 +1,6 @@
 # Tool for sending XDC offline
 
-Can be accessed here: <a href="https://xdcoutpost.xyz/XDC_Send_Offline_Helper/" target="_blank">https://xdcoutpost.xyz/XDC_Send_Offline_Helper/</a>
+Can be accessed here: <a href="https://xdcoutpost.xyz/XDC_Send_Offline_Helper/?utm_source=github" target="_blank">https://xdcoutpost.xyz/XDC_Send_Offline_Helper/</a>
 
 Designed to work as the ONLINE half of the system for offline transactions. Simple to use via a mobile phone browser. You can save the bookmark on your mobile web browser or even "Save to Homescreen" on iPhones to save it as a webapp with its own desktop icon on your phone. It is set to use the XDC logo for the icon on your phone in this case.
 
