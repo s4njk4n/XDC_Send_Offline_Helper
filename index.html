@@ -280,6 +280,11 @@
     .video-wrap video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .viewfinder { position: absolute; inset: 14%; border-radius: 12px; box-shadow: 0 0 0 999px rgb(13 11 38 / 0.45); outline: 2px solid var(--signal); }
     .scanner .btn { width: 100%; }
+    .scanner .scan-msg { color: var(--flare); font-size: 0.9rem; min-height: 1.2em; }
+    .input-row { display: flex; gap: 0.5rem; }
+    .input-row input { flex: 1; min-width: 0; }
+    .input-row .btn { flex: none; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .input-row .btn svg { width: 1.1rem; height: 1.1rem; }
     @media (max-width: 640px) {
       .group-body > .actions > .btn-primary { flex: 1; padding-top: 0.9rem; padding-bottom: 0.9rem; font-size: 1.05rem; }
     }
@@ -359,7 +364,11 @@
           <div class="group-body">
             <div class="field">
               <label for="address">Sending address</label>
-              <input type="text" id="address" class="mono" placeholder="xdc… or 0x…" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text">
+              <div class="input-row">
+                <input type="text" id="address" class="mono" placeholder="xdc… or 0x…" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text">
+                <button type="button" class="btn btn-ghost" id="scanAddrBtn" onclick="startQrScanner('address')" aria-label="Scan the sending address from a QR code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 12h8"/></svg>Scan</button>
+              </div>
+              <p class="hint">Scan the QR code of your offline wallet’s address, or type it in.</p>
             </div>
             <details class="settings">
               <summary>Network settings</summary>
@@ -406,7 +415,7 @@
           </div>
           <div class="group-body">
             <div class="actions">
-              <button type="button" class="btn btn-primary" id="scanQrBtn" onclick="startQrScanner()">Scan QR code</button>
+              <button type="button" class="btn btn-primary" id="scanQrBtn" onclick="startQrScanner('tx')">Scan QR code</button>
             </div>
             <div class="field">
               <label for="signedTx">Signed transaction</label>
@@ -473,11 +482,12 @@
   <div class="scanner-backdrop" id="qrScanner" hidden>
     <div class="scanner" role="dialog" aria-modal="true" aria-labelledby="scanner-title">
       <h2 id="scanner-title">Scan the signed transaction</h2>
-      <p>Point your camera at the QR code on your offline device. It fills in automatically.</p>
+      <p id="scanner-desc">Point your camera at the QR code on your offline device. It fills in automatically.</p>
       <div class="video-wrap">
         <video id="qrVideo" autoplay playsinline muted></video>
         <div class="viewfinder" aria-hidden="true"></div>
       </div>
+      <p class="scan-msg" id="scanMsg" role="status"></p>
       <button type="button" class="btn btn-ghost" id="stopScanBtn" onclick="stopQrScanner()">Cancel</button>
     </div>
   </div>
@@ -737,12 +747,28 @@
     }
 
     // ===== QR scanner =====
-    let stream = null, scanning = false;
-    async function startQrScanner() {
+    let stream = null, scanning = false, scanMode = 'tx', scanReturnFocus = null;
+    const SCAN_MODES = {
+      tx: { title: 'Scan the signed transaction', desc: 'Point your camera at the QR code on your offline device. It fills in automatically.', notice: 'broadcastResult', fallback: 'Paste the signed transaction instead.', button: 'scanQrBtn' },
+      address: { title: 'Scan the sending address', desc: 'Point your camera at the QR code of the address you’re sending from. It fills in automatically.', notice: 'paramsStatus', fallback: 'Type or paste the address instead.', button: 'scanAddrBtn' },
+    };
+    // Finds an XDC address inside whatever an address QR holds: a bare address, or a payment link
+    // such as "xdc:xdc…?amount=1", "ethereum:0x…@50" or "xdcpay:…". Returns it in xdc… form, or null.
+    function extractAddress(text) {
+      const m = String(text).match(/(?:^|[^0-9a-z])(xdc|0x)([0-9a-f]{40})(?![0-9a-f])/i);
+      return m ? 'xdc' + m[2] : null;
+    }
+    async function startQrScanner(mode = 'tx') {
+      scanMode = SCAN_MODES[mode] ? mode : 'tx';
+      const cfg = SCAN_MODES[scanMode];
       const overlay = $('qrScanner'), video = $('qrVideo');
-      setNotice('broadcastResult');
+      $('scanner-title').textContent = cfg.title;
+      $('scanner-desc').textContent = cfg.desc;
+      $('scanMsg').textContent = '';
+      scanReturnFocus = $(cfg.button);
+      setNotice(cfg.notice);
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        return setNotice('broadcastResult', 'error', 'This browser can’t use the camera here. Paste the signed transaction instead.');
+        return setNotice(cfg.notice, 'error', 'This browser can’t use the camera here. ' + cfg.fallback);
       }
       try {
         try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }); }
@@ -765,7 +791,21 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const code = jsQR(img.data, canvas.width, canvas.height, { inversionAttempts: 'attemptBoth' });
-            if (code && code.data) {
+            if (code && code.data && scanMode === 'address') {
+              const addr = extractAddress(code.data);
+              if (!addr) {
+                $('scanMsg').textContent = /^(0x)?(f8|f9|02)[0-9a-f]{60,}$/i.test(code.data.trim())
+                  ? 'That’s a signed transaction. Scan it in step 3. Here, scan your address.'
+                  : 'That QR code doesn’t contain an XDC address. Try another.';
+              } else {
+                $('address').value = addr;
+                stopQrScanner();
+                xdcTrack('send-offline/address-scanned');
+                if (navigator.vibrate) navigator.vibrate(60);
+                getTxParams();
+                return;
+              }
+            } else if (code && code.data) {
               $('signedTx').value = code.data.trim();
               stopQrScanner();
               xdcTrack('send-offline/qr-scanned');
@@ -781,6 +821,7 @@
         requestAnimationFrame(scan);
       } catch (error) {
         stopQrScanner();
+        const cfg = SCAN_MODES[scanMode];
         let message = '<strong>Couldn’t open the camera.</strong> ';
         if (error.name === 'NotAllowedError') message += 'Camera access was blocked. ';
         else if (error.name === 'NotFoundError') message += 'No camera was found. ';
@@ -788,8 +829,8 @@
         if (/iPhone|iPad|iPod/.test(navigator.userAgent)) message += 'Allow it in Settings, then Safari, then Camera.';
         else if (/Android/.test(navigator.userAgent)) message += 'Allow camera access for this site in your browser settings.';
         else message += 'Check your webcam is connected and allowed for this site.';
-        message += ' You can paste the signed transaction instead.';
-        setNotice('broadcastResult', 'error', message);
+        message += ' ' + cfg.fallback;
+        setNotice(cfg.notice, 'error', message);
         console.error('Camera Error:', error);
       }
     }
@@ -799,6 +840,7 @@
       $('qrVideo').srcObject = null;
       $('qrScanner').hidden = true;
       document.body.style.overflow = '';
+      if (scanReturnFocus) { scanReturnFocus.focus({ preventScroll: true }); scanReturnFocus = null; }
     }
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('qrScanner').hidden) stopQrScanner(); });
     $('qrScanner').addEventListener('click', e => { if (e.target === e.currentTarget) stopQrScanner(); });

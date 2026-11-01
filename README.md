@@ -12,7 +12,7 @@ New to sending offline? XinFin's [guide to Send Offline Functionality](https://m
 
 | Step | Where | What happens |
 |---|---|---|
-| 1. Get transaction details | This page | Enter the sending address. You get the **nonce**, **gas price** (in Gwei and wei) and a **gas limit** suggestion, each with a Copy button, plus the address's **balance**. |
+| 1. Get transaction details | This page | Tap **Scan** to read the sending address from your offline wallet's QR code (plain addresses and payment links both work), or type it in. You get the **nonce**, **gas price** (in Gwei and wei) and a **gas limit** suggestion, each with a Copy button, plus the address's **balance**. |
 | 2. Build and sign | Your offline device | Build the transaction with those values and sign it. Most offline builders show the result as a QR code. |
 | 3. Scan and broadcast | This page | Tap **Scan QR code** and point your camera at the offline device, or paste the signed transaction. **Check the summary**, then tap **Broadcast transaction**. |
 
